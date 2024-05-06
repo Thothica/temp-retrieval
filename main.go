@@ -69,7 +69,7 @@ func init() {
 
 func main() {
 	http.HandleFunc("POST /arabic-poems", HandleArabicPoems)
-    http.HandleFunc("POST /cleaned-dutchtext", HandleCleanedDutchText)
+	http.HandleFunc("POST /cleaned-dutchtext", HandleCleanedDutchText)
 	log.Fatal(http.ListenAndServe(":80", nil))
 }
 
