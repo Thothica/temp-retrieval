@@ -133,9 +133,9 @@ func HandleArabicPoems(w http.ResponseWriter, r *http.Request) {
 Poet: %v from %v
 Translated Text:
 %v`, source["title"], source["translated_title"], source["Poet"], source["Era"], source["translated_poem"])
-        
-        valMap["_source"] = source
-        data[idx] = valMap
+
+		valMap["_source"] = source
+		data[idx] = valMap
 	}
 
 	responseData, err := json.Marshal(data)
