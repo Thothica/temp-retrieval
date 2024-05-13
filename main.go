@@ -70,7 +70,94 @@ func init() {
 func main() {
 	http.HandleFunc("POST /arabic-poems", HandleArabicPoems)
 	http.HandleFunc("POST /cleaned-dutchtext", HandleCleanedDutchText)
-	log.Fatal(http.ListenAndServe(":80", nil))
+	http.HandleFunc("POST /cleaned-arabicbooks", HandleCleanedDutchText)
+	log.Fatal(http.ListenAndServe(":3000", nil))
+}
+
+func HandleCleanedArabicBooks(w http.ResponseWriter, r *http.Request) {
+	var req RequestBody
+
+	defer r.Body.Close()
+
+	err := json.NewDecoder(r.Body).Decode(&req)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	searchBody := strings.NewReader(fmt.Sprintf(`{
+                "_source": {
+                        "excludes": [
+                                "Raw_Response_embedding"
+                        ]
+                },
+                "query": {
+                        "neural": {
+                                "Raw_Response_embedding": {
+                                        "query_text": "%v",
+                                        "model_id": "AbDZGo8BB3UUeZ_94CHA",
+                                        "k": %v
+                                }
+                        }
+                },
+                "size": %v
+        }`, req.Query, req.K, req.Size))
+
+	semanticSearchRequest := opensearchapi.SearchRequest{
+		Index: []string{"cleaned-arabicbooks-index"},
+		Body:  searchBody,
+	}
+
+	var searchResponse map[string]interface{}
+
+	res, err := semanticSearchRequest.Do(context.Background(), c)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+	defer res.Body.Close()
+
+	err = json.NewDecoder(res.Body).Decode(&searchResponse)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+
+	data := searchResponse["hits"].(map[string]interface{})["hits"].([]interface{})
+
+	for idx, val := range data {
+		valMap, ok := val.(map[string]interface{})
+		if !ok {
+			continue
+		}
+
+		source := valMap["_source"].(map[string]interface{})
+
+		source["Results"] = fmt.Sprintf(`Book title: %v %v
+
+Author(s):
+
+%v
+
+Date: %v 
+
+Publisher: %v 
+
+Translated page content:
+
+%v
+
+URL: %v`, source["Title"], source["Title_Transliterated"], source["Author"], source["Date"], source["Publisher"], source["translation"], source["PDF_URL"])
+
+		valMap["_source"] = source
+		data[idx] = valMap
+	}
+
+	responseData, err := json.Marshal(data)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Write(responseData)
 }
 
 func HandleCleanedDutchText(w http.ResponseWriter, r *http.Request) {
