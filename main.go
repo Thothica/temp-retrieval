@@ -70,7 +70,7 @@ func init() {
 func main() {
 	http.HandleFunc("POST /arabic-poems", HandleArabicPoems)
 	http.HandleFunc("POST /cleaned-dutchtext", HandleCleanedDutchText)
-	http.HandleFunc("POST /cleaned-arabicbooks", HandleCleanedDutchText)
+	http.HandleFunc("POST /cleaned-arabicbooks", HandleCleanedArabicBooks)
 	log.Fatal(http.ListenAndServe(":3000", nil))
 }
 
