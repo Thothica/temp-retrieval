@@ -287,7 +287,7 @@ func HandleArabicPoems(w http.ResponseWriter, r *http.Request) {
 Poet: %v from %v
 Translated Text: %v`, source["title"], source["translated_title"], source["Poet"], source["Era"], source["translated_poem"])
 
-			source["Results_nonEnglish"] = fmt.Sprintf("%v", source["poem"])
+			source["Results_nonEnglish"] = fmt.Sprintf("%v \n\n %v", source["title"], source["poem"])
 
 			valMap["_source"] = source
 			dataCopy[idx] = valMap
