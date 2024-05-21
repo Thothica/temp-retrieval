@@ -161,6 +161,8 @@ Translated page content:
 
 URL: %v`, source["Title"], source["Title_Transliterated"], source["Author"], source["Date"], source["Publisher"], source["translation"], source["PDF_URL"])
 
+			source["Results_nonEnglish"] = fmt.Sprintf("%v", source["Full_Text"])
+
 			valMap["_source"] = source
 			dataCopy[idx] = valMap
 		}
@@ -224,6 +226,8 @@ Translated Text:
 Interpretation:
 %v`, source["title"], source["translation"], source["interpretation"])
 
+			source["Results_nonEnglish"] = fmt.Sprintf("%v", source["Text"])
+
 			valMap["_source"] = source
 			dataCopy[idx] = valMap
 		}
@@ -282,6 +286,8 @@ func HandleArabicPoems(w http.ResponseWriter, r *http.Request) {
 			source["Results"] = fmt.Sprintf(`Title: %v | Translated: %v
 Poet: %v from %v
 Translated Text: %v`, source["title"], source["translated_title"], source["Poet"], source["Era"], source["translated_poem"])
+
+			source["Results_nonEnglish"] = fmt.Sprintf("%v", source["poem"])
 
 			valMap["_source"] = source
 			dataCopy[idx] = valMap
