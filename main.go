@@ -10,6 +10,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/MadAppGang/httplog"
 	"github.com/joho/godotenv"
 	"github.com/opensearch-project/opensearch-go"
 	"github.com/opensearch-project/opensearch-go/opensearchapi"
@@ -68,9 +69,10 @@ func init() {
 }
 
 func main() {
-	http.HandleFunc("POST /arabic-poems", HandleArabicPoems)
-	http.HandleFunc("POST /cleaned-dutchtext", HandleCleanedDutchText)
-	http.HandleFunc("POST /cleaned-arabicbooks", HandleCleanedArabicBooks)
+	http.Handle("POST /arabic-poems", httplog.Logger(http.HandlerFunc(HandleArabicPoems)))
+	http.Handle("POST /cleaned-dutchtext", httplog.Logger(http.HandlerFunc(HandleCleanedDutchText)))
+	http.Handle("POST /cleaned-arabicbooks", httplog.Logger(http.HandlerFunc(HandleCleanedArabicBooks)))
+	http.Handle("/not_found", httplog.Logger(http.NotFoundHandler()))
 	log.Fatal(http.ListenAndServe(":3000", nil))
 }
 
