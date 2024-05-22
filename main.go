@@ -163,6 +163,15 @@ URL: %v`, source["Title"], source["Title_Transliterated"], source["Author"], sou
 
 			source["Results_nonEnglish"] = fmt.Sprintf("%v", source["Full_Text"])
 
+			for k, v := range source {
+				vstr, ok := v.(string)
+				if !ok {
+					continue
+				}
+				vstr += valMap["_id"].(string)
+				source[k] = vstr
+			}
+
 			valMap["_source"] = source
 			dataCopy[idx] = valMap
 		}
@@ -228,6 +237,15 @@ Interpretation:
 
 			source["Results_nonEnglish"] = fmt.Sprintf("%v", source["Text"])
 
+			for k, v := range source {
+				vstr, ok := v.(string)
+				if !ok {
+					continue
+				}
+				vstr += valMap["_id"].(string)
+				source[k] = vstr
+			}
+
 			valMap["_source"] = source
 			dataCopy[idx] = valMap
 		}
@@ -288,6 +306,15 @@ Poet: %v from %v
 Translated Text: %v`, source["title"], source["translated_title"], source["Poet"], source["Era"], source["translated_poem"])
 
 			source["Results_nonEnglish"] = fmt.Sprintf("%v \n\n %v", source["title"], source["poem"])
+
+			for k, v := range source {
+				vstr, ok := v.(string)
+				if !ok {
+					continue
+				}
+				vstr += valMap["_id"].(string)
+				source[k] = vstr
+			}
 
 			valMap["_source"] = source
 			dataCopy[idx] = valMap
