@@ -72,6 +72,7 @@ func main() {
 	http.Handle("POST /arabic-poems", httplog.Logger(http.HandlerFunc(HandleArabicPoems)))
 	http.Handle("POST /cleaned-dutchtext", httplog.Logger(http.HandlerFunc(HandleCleanedDutchText)))
 	http.Handle("POST /cleaned-arabicbooks", httplog.Logger(http.HandlerFunc(HandleCleanedArabicBooks)))
+	http.Handle("POST /libertarian-chunks", httplog.Logger(http.HandlerFunc(HandleLibertarianChunks)))
 	http.Handle("/not_found", httplog.Logger(http.NotFoundHandler()))
 	log.Fatal(http.ListenAndServe(":3000", nil))
 }
@@ -104,6 +105,48 @@ func SemanitcSearch(body *strings.Reader, index string, transformation func(d *[
 	}
 
 	return responseData, nil
+}
+
+func HandleLibertarianChunks(w http.ResponseWriter, r *http.Request) {
+	var req RequestBody
+
+	defer r.Body.Close()
+
+	err := json.NewDecoder(r.Body).Decode(&req)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	searchBody := strings.NewReader(fmt.Sprintf(`{
+                "_source": {
+                        "excludes": [
+                                "Text_embedding"
+                        ]
+                },
+                "query": {
+                        "neural": {
+                                "Text_embedding": {
+                                        "query_text": "%v",
+                                        "model_id": "AbDZGo8BB3UUeZ_94CHA",
+                                        "k": %v
+                                }
+                        }
+                },
+                "size": %v
+        }`, req.Query, req.K, req.Size))
+
+	t := func(data *[]interface{}) {
+	}
+
+	res, err := SemanitcSearch(searchBody, "libertarian-chunks-index", t)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Write(res)
 }
 
 func HandleCleanedArabicBooks(w http.ResponseWriter, r *http.Request) {
