@@ -137,6 +137,44 @@ func HandleLibertarianChunks(w http.ResponseWriter, r *http.Request) {
         }`, req.Query, req.K, req.Size))
 
 	t := func(data *[]interface{}) {
+		dataCopy := *data
+		for idx, val := range dataCopy {
+			valMap, ok := val.(map[string]interface{})
+			if !ok {
+				continue
+			}
+
+			source := valMap["_source"].(map[string]interface{})
+
+			source["Results"] = fmt.Sprintf(`Book title: %v
+
+Author(s):
+
+%v
+
+Date: %v 
+
+Publisher: %v 
+
+Text: 
+
+%v
+
+URL: %v`, source["Title"], source["Author"], source["Date"], source["Publisher"], source["Text"], source["TITLE_URL"])
+
+			for k, v := range source {
+				vstr, ok := v.(string)
+				if !ok {
+					continue
+				}
+				vstr += valMap["_id"].(string)
+				source[k] = vstr
+			}
+
+			valMap["_source"] = source
+			dataCopy[idx] = valMap
+		}
+		data = &dataCopy
 	}
 
 	res, err := SemanitcSearch(searchBody, "libertarian-chunks-index", t)
@@ -280,6 +318,8 @@ Interpretation:
 
 			source["Results_nonEnglish"] = fmt.Sprintf("%v", source["Text"])
 
+			source["Results_orignal"] = fmt.Sprintf("Title: %v \n content: %v", source["title"], source["Text"])
+
 			for k, v := range source {
 				vstr, ok := v.(string)
 				if !ok {
@@ -349,6 +389,8 @@ Poet: %v from %v
 Translated Text: %v`, source["title"], source["translated_title"], source["Poet"], source["Era"], source["translated_poem"])
 
 			source["Results_nonEnglish"] = fmt.Sprintf("%v \n\n %v", source["title"], source["poem"])
+
+			source["Results_orignal"] = fmt.Sprintf("Title: %v, \n Poem: %v", source["title"], source["poem"])
 
 			for k, v := range source {
 				vstr, ok := v.(string)
