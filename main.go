@@ -242,7 +242,8 @@ Translated page content:
 
 URL: %v`, source["Title"], source["Title_Transliterated"], source["Author"], source["Date"], source["Publisher"], source["translation"], source["PDF_URL"])
 
-			source["Results_nonEnglish"] = fmt.Sprintf("%v", source["Full_Text"])
+			source["Results_nonEnglish"] = fmt.Sprintf("Book title: %v \n Author(s): %v, Date: %v, Publisher: %v, Url: %v \n\n content: \n %v", source["Title"], source["Author"],
+				source["Date"], source["Publisher"], source["PDF_URL"], source["Text"])
 
 			for k, v := range source {
 				vstr, ok := v.(string)
@@ -316,7 +317,7 @@ Translated Text:
 Interpretation:
 %v`, source["title"], source["translation"], source["interpretation"])
 
-			source["Results_nonEnglish"] = fmt.Sprintf("%v", source["Text"])
+			source["Results_nonEnglish"] = fmt.Sprintf("Title: %v \n content: %v", source["title"], source["Text"])
 
 			source["Results_orignal"] = fmt.Sprintf("Title: %v \n content: %v", source["title"], source["Text"])
 
@@ -388,7 +389,7 @@ func HandleArabicPoems(w http.ResponseWriter, r *http.Request) {
 Poet: %v from %v
 Translated Text: %v`, source["title"], source["translated_title"], source["Poet"], source["Era"], source["translated_poem"])
 
-			source["Results_nonEnglish"] = fmt.Sprintf("%v \n\n %v", source["title"], source["poem"])
+			source["Results_nonEnglish"] = fmt.Sprintf("Title: %v \n Poet: %v, \n\n Poem: %v", source["title"], source["Poet"], source["poem"])
 
 			source["Results_orignal"] = fmt.Sprintf("Title: %v, \n Poem: %v", source["title"], source["poem"])
 
