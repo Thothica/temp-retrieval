@@ -162,18 +162,21 @@ Text:
 
 URL: %v`, source["Title"], source["Author"], source["Date"], source["Publisher"], source["Text"], source["TITLE_URL"])
 
+			source["Results_id"] = fmt.Sprintf("%s", valMap["_id"].(string))
+
 			for k, v := range source {
 				vstr, ok := v.(string)
 				if !ok {
 					continue
 				}
-				vstr += valMap["_id"].(string)
+				vstr += fmt.Sprintf("\t%s", valMap["_id"].(string))
 				source[k] = vstr
 			}
 
 			valMap["_source"] = source
 			dataCopy[idx] = valMap
 		}
+
 		data = &dataCopy
 	}
 
@@ -245,12 +248,14 @@ URL: %v`, source["Title"], source["Title_Transliterated"], source["Author"], sou
 			source["Results_nonEnglish"] = fmt.Sprintf("Book title: %v \n Author(s): %v, Date: %v, Publisher: %v, Url: %v \n\n content: \n %v", source["Title"], source["Author"],
 				source["Date"], source["Publisher"], source["PDF_URL"], source["Text"])
 
+			source["Results_id"] = fmt.Sprintf("%s", valMap["_id"].(string))
+
 			for k, v := range source {
 				vstr, ok := v.(string)
 				if !ok {
 					continue
 				}
-				vstr += valMap["_id"].(string)
+				vstr += fmt.Sprintf("\t%s", valMap["_id"].(string))
 				source[k] = vstr
 			}
 
@@ -321,12 +326,14 @@ Interpretation:
 
 			source["Results_orignal"] = fmt.Sprintf("Title: %v \n content: %v", source["title"], source["Text"])
 
+			source["Results_id"] = fmt.Sprintf("%s", valMap["_id"].(string))
+
 			for k, v := range source {
 				vstr, ok := v.(string)
 				if !ok {
 					continue
 				}
-				vstr += valMap["_id"].(string)
+				vstr += fmt.Sprintf("\t%s", valMap["_id"].(string))
 				source[k] = vstr
 			}
 
@@ -393,12 +400,14 @@ Translated Text: %v`, source["title"], source["translated_title"], source["Poet"
 
 			source["Results_orignal"] = fmt.Sprintf("Title: %v, \n Poem: %v", source["title"], source["poem"])
 
+			source["Results_id"] = fmt.Sprintf("%s", valMap["_id"].(string))
+
 			for k, v := range source {
 				vstr, ok := v.(string)
 				if !ok {
 					continue
 				}
-				vstr += valMap["_id"].(string)
+				vstr += fmt.Sprintf("\t%s", valMap["_id"].(string))
 				source[k] = vstr
 			}
 
