@@ -77,7 +77,34 @@ func main() {
 	log.Fatal(http.ListenAndServe(":3000", nil))
 }
 
-func SemanitcSearch(body *strings.Reader, index string, transformation func(d *[]interface{})) ([]byte, error) {
+func resultTransformation(data *[]interface{}, sourceTransformation func(source *map[string]interface{})) {
+	dataCopy := *data
+	for idx, val := range dataCopy {
+		valMap, ok := val.(map[string]interface{})
+		if !ok {
+			continue
+		}
+
+		source := valMap["_source"].(map[string]interface{})
+		sourceTransformation(&source)
+		source["Results_id"] = fmt.Sprintf("%s", valMap["_id"].(string))
+
+		for k, v := range source {
+			vstr, ok := v.(string)
+			if !ok {
+				continue
+			}
+			vstr += fmt.Sprintf("\t%s", valMap["_id"].(string))
+			source[k] = vstr
+		}
+
+		valMap["_source"] = source
+		dataCopy[idx] = valMap
+	}
+	data = &dataCopy
+}
+
+func SemanitcSearch(body *strings.Reader, index string, sourceTransformation func(source *map[string]interface{})) ([]byte, error) {
 	var searchResponse map[string]interface{}
 
 	semanticSearchRequest := opensearchapi.SearchRequest{
@@ -97,7 +124,7 @@ func SemanitcSearch(body *strings.Reader, index string, transformation func(d *[
 	}
 
 	data := searchResponse["hits"].(map[string]interface{})["hits"].([]interface{})
-	transformation(&data)
+	resultTransformation(&data, sourceTransformation)
 
 	responseData, err := json.Marshal(data)
 	if err != nil {
@@ -136,17 +163,9 @@ func HandleLibertarianChunks(w http.ResponseWriter, r *http.Request) {
                 "size": %v
         }`, req.Query, req.K, req.Size))
 
-	t := func(data *[]interface{}) {
-		dataCopy := *data
-		for idx, val := range dataCopy {
-			valMap, ok := val.(map[string]interface{})
-			if !ok {
-				continue
-			}
-
-			source := valMap["_source"].(map[string]interface{})
-
-			source["Results"] = fmt.Sprintf(`Book title: %v
+	sourceTransformation := func(sourceOrg *map[string]interface{}) {
+		source := *sourceOrg
+		source["Results"] = fmt.Sprintf(`Book title: %v
 
 Author(s):
 
@@ -161,26 +180,10 @@ Text:
 %v
 
 URL: %v`, source["Title"], source["Author"], source["Date"], source["Publisher"], source["Text"], source["TITLE_URL"])
-
-			source["Results_id"] = fmt.Sprintf("%s", valMap["_id"].(string))
-
-			for k, v := range source {
-				vstr, ok := v.(string)
-				if !ok {
-					continue
-				}
-				vstr += fmt.Sprintf("\t%s", valMap["_id"].(string))
-				source[k] = vstr
-			}
-
-			valMap["_source"] = source
-			dataCopy[idx] = valMap
-		}
-
-		data = &dataCopy
+		sourceOrg = &source
 	}
 
-	res, err := SemanitcSearch(searchBody, "libertarian-chunks-index", t)
+	res, err := SemanitcSearch(searchBody, "libertarian-chunks-index", sourceTransformation)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
@@ -219,17 +222,9 @@ func HandleCleanedArabicBooks(w http.ResponseWriter, r *http.Request) {
                 "size": %v
         }`, req.Query, req.K, req.Size))
 
-	t := func(data *[]interface{}) {
-		dataCopy := *data
-		for idx, val := range dataCopy {
-			valMap, ok := val.(map[string]interface{})
-			if !ok {
-				continue
-			}
-
-			source := valMap["_source"].(map[string]interface{})
-
-			source["Results"] = fmt.Sprintf(`Book title: %v %v
+	sourceTransformation := func(sourceOrg *map[string]interface{}) {
+		source := *sourceOrg
+		source["Results"] = fmt.Sprintf(`Book title: %v %v
 
 Author(s):
 
@@ -245,27 +240,12 @@ Translated page content:
 
 URL: %v`, source["Title"], source["Title_Transliterated"], source["Author"], source["Date"], source["Publisher"], source["translation"], source["PDF_URL"])
 
-			source["Results_nonEnglish"] = fmt.Sprintf("Book title: %v \n Author(s): %v, Date: %v, Publisher: %v, Url: %v \n\n content: \n %v", source["Title"], source["Author"],
-				source["Date"], source["Publisher"], source["PDF_URL"], source["Text"])
-
-			source["Results_id"] = fmt.Sprintf("%s", valMap["_id"].(string))
-
-			for k, v := range source {
-				vstr, ok := v.(string)
-				if !ok {
-					continue
-				}
-				vstr += fmt.Sprintf("\t%s", valMap["_id"].(string))
-				source[k] = vstr
-			}
-
-			valMap["_source"] = source
-			dataCopy[idx] = valMap
-		}
-		data = &dataCopy
+		source["Results_nonEnglish"] = fmt.Sprintf("Book title: %v \n Author(s): %v, Date: %v, Publisher: %v, Url: %v \n\n content: \n %v", source["Title"], source["Author"],
+			source["Date"], source["Publisher"], source["PDF_URL"], source["Text"])
+		sourceOrg = &source
 	}
 
-	res, err := SemanitcSearch(searchBody, "cleaned-arabicbooks-index", t)
+	res, err := SemanitcSearch(searchBody, "cleaned-arabicbooks-index", sourceTransformation)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
@@ -304,17 +284,9 @@ func HandleCleanedDutchText(w http.ResponseWriter, r *http.Request) {
                 "size": %v
         }`, dutchtextrequest.Query, dutchtextrequest.K, dutchtextrequest.Size))
 
-	t := func(d *[]interface{}) {
-		dataCopy := *d
-		for idx, val := range dataCopy {
-			valMap, ok := val.(map[string]interface{})
-			if !ok {
-				continue
-			}
-
-			source := valMap["_source"].(map[string]interface{})
-
-			source["Results"] = fmt.Sprintf(`Title: %v
+	sourceTransformation := func(sourceOrg *map[string]interface{}) {
+		source := *sourceOrg
+		source["Results"] = fmt.Sprintf(`Title: %v
 
 Translated Text:
 %v
@@ -322,28 +294,13 @@ Translated Text:
 Interpretation:
 %v`, source["title"], source["translation"], source["interpretation"])
 
-			source["Results_nonEnglish"] = fmt.Sprintf("Title: %v \n content: %v", source["title"], source["Text"])
+		source["Results_nonEnglish"] = fmt.Sprintf("Title: %v \n content: %v", source["title"], source["Text"])
 
-			source["Results_orignal"] = fmt.Sprintf("Title: %v \n content: %v", source["title"], source["Text"])
-
-			source["Results_id"] = fmt.Sprintf("%s", valMap["_id"].(string))
-
-			for k, v := range source {
-				vstr, ok := v.(string)
-				if !ok {
-					continue
-				}
-				vstr += fmt.Sprintf("\t%s", valMap["_id"].(string))
-				source[k] = vstr
-			}
-
-			valMap["_source"] = source
-			dataCopy[idx] = valMap
-		}
-		d = &dataCopy
+		source["Results_orignal"] = fmt.Sprintf("Title: %v \n content: %v", source["title"], source["Text"])
+		sourceOrg = &source
 	}
 
-	res, err := SemanitcSearch(searchBody, "cleaned-dutchtext-index", t)
+	res, err := SemanitcSearch(searchBody, "cleaned-dutchtext-index", sourceTransformation)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
@@ -382,42 +339,17 @@ func HandleArabicPoems(w http.ResponseWriter, r *http.Request) {
                 "size": %v
         }`, arabicpoemsRequest.Query, arabicpoemsRequest.K, arabicpoemsRequest.Size))
 
-	t := func(d *[]interface{}) {
-		dataCopy := *d
-		for idx, val := range dataCopy {
-			valMap, ok := val.(map[string]interface{})
-			if !ok {
-				continue
-			}
-
-			source := valMap["_source"].(map[string]interface{})
-
-			source["Results"] = fmt.Sprintf(`Title: %v | Translated: %v
+	sourceTransformation := func(sourceOrg *map[string]interface{}) {
+		source := *sourceOrg
+		source["Results"] = fmt.Sprintf(`Title: %v | Translated: %v
 Poet: %v from %v
 Translated Text: %v`, source["title"], source["translated_title"], source["Poet"], source["Era"], source["translated_poem"])
-
-			source["Results_nonEnglish"] = fmt.Sprintf("Title: %v \n Poet: %v, \n\n Poem: %v", source["title"], source["Poet"], source["poem"])
-
-			source["Results_orignal"] = fmt.Sprintf("Title: %v, \n Poem: %v", source["title"], source["poem"])
-
-			source["Results_id"] = fmt.Sprintf("%s", valMap["_id"].(string))
-
-			for k, v := range source {
-				vstr, ok := v.(string)
-				if !ok {
-					continue
-				}
-				vstr += fmt.Sprintf("\t%s", valMap["_id"].(string))
-				source[k] = vstr
-			}
-
-			valMap["_source"] = source
-			dataCopy[idx] = valMap
-		}
-		d = &dataCopy
+		source["Results_nonEnglish"] = fmt.Sprintf("Title: %v \n Poet: %v, \n\n Poem: %v", source["title"], source["Poet"], source["poem"])
+		source["Results_orignal"] = fmt.Sprintf("Title: %v, \n Poem: %v", source["title"], source["poem"])
+		sourceOrg = &source
 	}
 
-	res, err := SemanitcSearch(searchBody, "arabic-poems-index", t)
+	res, err := SemanitcSearch(searchBody, "arabic-poems-index", sourceTransformation)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
