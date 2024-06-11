@@ -166,7 +166,7 @@ func HandleLegalText(w http.ResponseWriter, r *http.Request) {
 
 	sourceTransformation := func(sourceOrg *map[string]interface{}) {
 		source := *sourceOrg
-		source["Results"] = fmt.Sprintf("Title: %v \n Url: %v \n summary: %v \n\n Interesting detail: %v\n%v", source["Title"], source["URL"], source["answer2"], source["explanation"], source["thinking"])
+		source["Results"] = fmt.Sprintf("Title: %v \n Url: %v \n summary: %v \n\n Interesting detail: %v\n%v", source["Title"], source["URL"], source["explanation"], source["answer1"], source["answer2"])
 		sourceOrg = &source
 	}
 
