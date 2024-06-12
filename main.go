@@ -73,7 +73,7 @@ func main() {
 	http.Handle("POST /cleaned-dutchtext", httplog.Logger(http.HandlerFunc(HandleCleanedDutchText)))
 	http.Handle("POST /cleaned-arabicbooks", httplog.Logger(http.HandlerFunc(HandleCleanedArabicBooks)))
 	http.Handle("POST /libertarian-chunks", httplog.Logger(http.HandlerFunc(HandleLibertarianChunks)))
-	http.Handle("POST /legaltext", httplog.Logger(http.HandlerFunc(HandleLibertarianChunks)))
+	http.Handle("POST /legaltext", httplog.Logger(http.HandlerFunc(HandleLegalText)))
 	http.Handle("/not_found", httplog.Logger(http.NotFoundHandler()))
 	log.Fatal(http.ListenAndServe(":3000", nil))
 }
