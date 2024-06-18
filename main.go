@@ -75,6 +75,7 @@ func main() {
 	http.Handle("POST /libertarian-chunks", httplog.Logger(http.HandlerFunc(HandleLibertarianChunks)))
 	http.Handle("POST /legaltext", httplog.Logger(http.HandlerFunc(HandleLegalText)))
 	http.Handle("POST /loc", httplog.Logger(http.HandlerFunc(HandleLoc)))
+	http.Handle("POST /indian-lit", httplog.Logger(http.HandlerFunc(HandleIndianLit)))
 	http.Handle("/not_found", httplog.Logger(http.NotFoundHandler()))
 	log.Fatal(http.ListenAndServe(":3000", nil))
 }
@@ -134,6 +135,48 @@ func SemanitcSearch(body *strings.Reader, index string, sourceTransformation fun
 	}
 
 	return responseData, nil
+}
+
+func HandleIndianLit(w http.ResponseWriter, r *http.Request) {
+	var req RequestBody
+
+	defer r.Body.Close()
+
+	err := json.NewDecoder(r.Body).Decode(&req)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	searchBody := strings.NewReader(fmt.Sprintf(`{
+                "_source": {
+                        "excludes": [
+                                "Raw_response_embedding"
+                        ]
+                },
+                "query": {
+                        "neural": {
+                                "Raw_response_embedding": {
+                                        "query_text": "%v",
+                                        "model_id": "AbDZGo8BB3UUeZ_94CHA",
+                                        "k": %v
+                                }
+                        }
+                },
+                "size": %v
+        }`, req.Query, req.K, req.Size))
+
+	sourceTransformation := func(sourceOrg *map[string]interface{}) {
+	}
+
+	res, err := SemanitcSearch(searchBody, "indic-lit-index", sourceTransformation)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Write(res)
 }
 
 func HandleLoc(w http.ResponseWriter, r *http.Request) {
