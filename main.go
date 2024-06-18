@@ -167,6 +167,22 @@ func HandleIndianLit(w http.ResponseWriter, r *http.Request) {
         }`, req.Query, req.K, req.Size))
 
 	sourceTransformation := func(sourceOrg *map[string]interface{}) {
+		source := *sourceOrg
+		source["Results"] = fmt.Sprintf("Author:\t%v\n\nBook:\t%v\n\nChapter:\t%v\n\nEditor:\t%v\n\nInterpretation:\t%v\n\nParagraph:\t%v\n\nPublication:\t%v\n\nSubject:\t%v\n\nTitle:\t%v\n\nTranslation:\t%v\n\nUrl:\t%v\n\nInput_token:\t%v\n\nOutput_token:\t%v",
+			source["Author"],
+			source["Book"],
+			source["Chapter"],
+			source["Editor"],
+			source["Interpretation"],
+			source["Paragraph"],
+			source["Publication"],
+			source["Subject"],
+			source["Title"],
+			source["Translation"],
+			source["Url"],
+			source["Input_token"],
+			source["Output_token"])
+		sourceOrg = &source
 	}
 
 	res, err := SemanitcSearch(searchBody, "indic-lit-index", sourceTransformation)
