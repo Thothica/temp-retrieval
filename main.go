@@ -158,7 +158,7 @@ func HandleIndianLit(w http.ResponseWriter, r *http.Request) {
                         "neural": {
                                 "Raw_response_embedding": {
                                         "query_text": "%v",
-                                        "model_id": "AbDZGo8BB3UUeZ_94CHA",
+                                        "model_id": "_7DWGo8BB3UUeZ_9PCB",
                                         "k": %v
                                 }
                         }
@@ -216,7 +216,7 @@ func HandleLoc(w http.ResponseWriter, r *http.Request) {
                         "neural": {
                                 "Text_embedding": {
                                         "query_text": "%v",
-                                        "model_id": "AbDZGo8BB3UUeZ_94CHA",
+                                        "model_id": "_7DWGo8BB3UUeZ_9PCB",
                                         "k": %v
                                 }
                         }
@@ -258,7 +258,7 @@ func HandleLegalText(w http.ResponseWriter, r *http.Request) {
                         "neural": {
                                 "Raw_Response_embedding": {
                                         "query_text": "%v",
-                                        "model_id": "AbDZGo8BB3UUeZ_94CHA",
+                                        "model_id": "_7DWGo8BB3UUeZ_9PCB",
                                         "k": %v
                                 }
                         }
@@ -303,7 +303,7 @@ func HandleLibertarianChunks(w http.ResponseWriter, r *http.Request) {
                         "neural": {
                                 "Text_embedding": {
                                         "query_text": "%v",
-                                        "model_id": "AbDZGo8BB3UUeZ_94CHA",
+                                        "model_id": "_7DWGo8BB3UUeZ_9PCB",
                                         "k": %v
                                 }
                         }
@@ -362,7 +362,7 @@ func HandleCleanedArabicBooks(w http.ResponseWriter, r *http.Request) {
                         "neural": {
                                 "Raw_Response_embedding": {
                                         "query_text": "%v",
-                                        "model_id": "AbDZGo8BB3UUeZ_94CHA",
+                                        "model_id": "_7DWGo8BB3UUeZ_9PCB",
                                         "k": %v
                                 }
                         }
@@ -424,7 +424,7 @@ func HandleCleanedDutchText(w http.ResponseWriter, r *http.Request) {
                         "neural": {
                                 "Raw_Response_embedding": {
                                         "query_text": "%v",
-                                        "model_id": "AbDZGo8BB3UUeZ_94CHA",
+                                        "model_id": "_7DWGo8BB3UUeZ_9PCB",
                                         "k": %v
                                 }
                         }
@@ -479,7 +479,7 @@ func HandleArabicPoems(w http.ResponseWriter, r *http.Request) {
                         "neural": {
                                 "interpretation_embedding": {
                                         "query_text": "%v",
-                                        "model_id": "AbDZGo8BB3UUeZ_94CHA",
+                                        "model_id": "_7DWGo8BB3UUeZ_9PCB",
                                         "k": %v
                                 }
                         }
