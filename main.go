@@ -227,7 +227,7 @@ func HandleLoc(w http.ResponseWriter, r *http.Request) {
 	sourceTransformation := func(sourceOrg *map[string]interface{}) {
 	}
 
-	res, err := SemanitcSearch(searchBody, "loc-index", sourceTransformation)
+	res, err := SemanitcSearch(searchBody, "loc-new-index", sourceTransformation)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
