@@ -5,6 +5,7 @@ import (
 	"crypto/tls"
 	"encoding/json"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"os"
@@ -168,6 +169,30 @@ func HandleOpenalex(w http.ResponseWriter, r *http.Request) {
         }`, req.Query, req.K, req.Size))
 
 	sourceTransformation := func(sourceOrg *map[string]interface{}) {
+		source := *sourceOrg
+
+		i := strings.Split(source["id"].(string), "/")
+		id := i[len(i)-1]
+		metadata_url := fmt.Sprintf("https://api.openalex.org/works/%s", id)
+
+		metadata := ""
+		resp, err := http.Get(metadata_url)
+		if err != nil {
+			return
+		}
+		defer resp.Body.Close()
+
+		if resp.StatusCode == http.StatusOK {
+			bodyBytes, err := io.ReadAll(resp.Body)
+			if err != nil {
+				return
+			}
+			metadata = string(bodyBytes)
+		}
+
+		source["metadata"] = metadata
+
+		sourceOrg = &source
 	}
 
 	res, err := SemanitcSearch(searchBody, "openalex-index", sourceTransformation)
